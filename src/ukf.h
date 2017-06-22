@@ -11,7 +11,7 @@ using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
 class UKF {
-public:
+ public:
 
   ///* initially set to false, set to true in first call of ProcessMeasurement
   bool is_initialized_;
@@ -53,7 +53,7 @@ public:
   double std_radphi_;
 
   ///* Radar measurement noise standard deviation radius change in m/s
-  double std_radrd_ ;
+  double std_radrd_;
 
   ///* Weights of sigma points
   VectorXd weights_;
@@ -67,6 +67,20 @@ public:
   ///* Sigma point spreading parameter
   double lambda_;
 
+  // Lidar measurement matrix
+  MatrixXd H_;
+
+  //Lidar Measurement covariance matrix - laser
+  MatrixXd R_laser_;
+
+  //add measurement noise covariance matrix -radar
+  MatrixXd R_radar_;
+
+  ///* the current NIS for radar
+  double NIS_radar_;
+
+  ///* the current NIS for laser
+  double NIS_laser_;
 
   /**
    * Constructor
@@ -102,6 +116,18 @@ public:
    * @param meas_package The measurement at k+1
    */
   void UpdateRadar(MeasurementPackage meas_package);
+
+  void GenerateSigmaPoints(MatrixXd *Xsig_out);
+  void AugmentedSigmaPoints(MatrixXd *Xsig_out);
+  void SigmaPointPrediction(MatrixXd &Xsig_aug,
+                            MatrixXd *Xsig_out,
+                            double delta_t);
+  void PredictMeanAndCovariance(VectorXd *x_pred, MatrixXd *P_pred);
+  void PredictRadarMeasurement(VectorXd *z_out,
+                               MatrixXd *S_out,
+                               MatrixXd &Zsig);
+  void UpdateState(MatrixXd &Zsig, MatrixXd &S, VectorXd &z_pred, VectorXd &z,
+                   VectorXd *x_out, MatrixXd *P_out);
 };
 
 #endif /* UKF_H */
